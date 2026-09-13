@@ -26,6 +26,7 @@ export default function ForgotPassword() {
         email,
         captchaToken,
       });
+      sessionStorage.setItem('resetEmail', email);
       setMsg(res.data.message);
       setIsError(false);
       setTimeout(() => {

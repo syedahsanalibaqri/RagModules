@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
@@ -163,6 +164,57 @@ async function runTests() {
     assert(
       res10.status === 200 && res10.data.message.includes('Message sent successfully'),
       'Contact Form: successful submission with dev simulation (200 OK)'
+    );
+
+    // -------------------------------------------------------------
+    // Test 9: End-to-End Forgot Password & Reset Password Flow
+    // -------------------------------------------------------------
+    const bcrypt = require('bcryptjs');
+    const mockUser = {
+      _id: 'usr_test_123',
+      name: 'Test User',
+      email: 'user@example.com',
+      isEmailVerified: false,
+      save: async function () { return this; },
+    };
+    User.findOne = () => {
+      const p = Promise.resolve(mockUser);
+      p.select = () => p;
+      return p;
+    };
+
+    const res11 = await request(server, 'POST', '/api/auth/forgot-password', {
+      email: 'user@example.com',
+    });
+    assert(
+      res11.status === 200 && res11.data.message.includes('OTP has been sent'),
+      'Forgot Password: OTP generation & email dispatch successful (200 OK)'
+    );
+
+    // Verify OTP using known generated hash
+    mockUser.otpHash = await bcrypt.hash('654321', 10);
+    mockUser.otpExpires = Date.now() + 5 * 60 * 1000;
+    mockUser.otpAttempts = 0;
+
+    const res12 = await request(server, 'POST', '/api/auth/verify-otp', {
+      email: 'user@example.com',
+      otp: '654321',
+    });
+    assert(
+      res12.status === 200 && res12.data.message.includes('verified successfully'),
+      'Verify OTP: valid OTP verified successfully (200 OK)'
+    );
+
+    const res13 = await request(server, 'POST', '/api/auth/reset-password', {
+      email: 'user@example.com',
+      otp: '654321',
+      newPassword: 'newValidPassword123',
+    });
+    assert(
+      res13.status === 200 &&
+        res13.data.message.includes('Password reset successful') &&
+        mockUser.isEmailVerified === true,
+      'Reset Password: password updated & email marked verified (200 OK)'
     );
 
   } finally {

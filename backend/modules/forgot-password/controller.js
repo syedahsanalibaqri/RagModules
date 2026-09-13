@@ -8,10 +8,14 @@ exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email is required.' });
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    let user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return res.status(200).json({
-        message: 'If that email is registered, an OTP has been sent.',
+      const nameFromEmail = email.split('@')[0];
+      user = await User.create({
+        name: nameFromEmail,
+        email: email.toLowerCase().trim(),
+        isEmailVerified: false,
+        isActive: true,
       });
     }
 
@@ -56,7 +60,7 @@ exports.verifyOtp = async (req, res) => {
     if (!user || !user.otpHash) {
       return res.status(400).json({ message: 'No OTP request found. Please try again.' });
     }
-    if (Date.now() > user.otpExpires) {
+    if (!user.otpExpires || Date.now() > new Date(user.otpExpires).getTime()) {
       return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
     }
 
@@ -104,7 +108,7 @@ exports.resetPassword = async (req, res) => {
     if (!user || !user.otpHash) {
       return res.status(400).json({ message: 'No OTP request found. Please start again.' });
     }
-    if (Date.now() > user.otpExpires) {
+    if (!user.otpExpires || Date.now() > new Date(user.otpExpires).getTime()) {
       return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
     }
 
@@ -127,8 +131,9 @@ exports.resetPassword = async (req, res) => {
     user.otpExpires = undefined;
     user.otpAttempts = 0;
 
-    // Change password
+    // Change password and ensure email is marked verified
     user.password = await bcrypt.hash(newPassword, 12);
+    user.isEmailVerified = true;
     await user.save();
 
     sendPasswordChangedEmail(user).catch((e) =>

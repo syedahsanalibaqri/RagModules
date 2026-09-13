@@ -10,13 +10,7 @@ node_modules/
 .pnp.js
 
 # Environment variables & secrets (Root and ALL subfolders)
-.env
-.env.*
-.env*
-**/.env
-**/.env.*
-**/.env*
-*.env
+# (.env tracking explicitly enabled by user request)
 
 # Production build outputs
 dist/
