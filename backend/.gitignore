@@ -4,7 +4,8 @@ node_modules/
 # Environment variables
 .env
 .env.*
-!.env.example
+.env*
+*.env
 
 # Runtime local data & databases
 data/

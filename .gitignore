@@ -12,13 +12,11 @@ node_modules/
 # Environment variables & secrets (Root and ALL subfolders)
 .env
 .env.*
+.env*
 **/.env
 **/.env.*
+**/.env*
 *.env
-
-# Keep template/example files tracked
-!.env.example
-!**/.env.example
 
 # Production build outputs
 dist/
