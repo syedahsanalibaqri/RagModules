@@ -1,0 +1,54 @@
+# ============================================================
+# Root .gitignore — Dependencies, Secrets, Builds, & Data
+# ============================================================
+
+# Dependencies
+node_modules/
+*/node_modules/
+.pnp
+.pnp.js
+
+# Environment variables & secrets (CRITICAL: Never commit secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*/.env
+*/.env.local
+*.env
+
+# Production build outputs
+dist/
+*/dist/
+build/
+*/build/
+dist-ssr/
+
+# Runtime / Local Database Files
+backend/data/
+data/
+*.sqlite
+*.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
